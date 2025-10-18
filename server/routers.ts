@@ -29,15 +29,24 @@ export const appRouter = router({
       db.getUserEntities(ctx.user.id)
     ),
     
-    get: protectedProcedure
-      .input(z.object({ id: z.string() }))
-      .query(async ({ input, ctx }) => {
-        const entity = await db.getEntityById(input.id);
-        if (!entity || entity.userId !== ctx.user.id) {
-          throw new Error("Entity not found");
-        }
-        return entity;
-      }),
+  get: publicProcedure
+  .input(z.object({ id: z.string() }))
+  .query(async ({ input, ctx }) => {
+    const pr = await db.getPressReleaseById(input.id);
+    if (!pr) {
+      throw new Error("Press release not found");
+    }
+    
+    // If press release is published, anyone can view it
+    // If it's a draft, only the owner can view it
+    if (pr.status !== "published" && (!ctx.user || pr.userId !== ctx.user.id)) {
+      throw new Error("Press release not found");
+    }
+    
+    const media = await db.getPressReleaseMedia(input.id);
+    return { ...pr, media };
+  }),
+
     
     create: protectedProcedure
       .input(z.object({
