@@ -201,3 +201,4 @@ export async function deleteMediaFile(id: string) {
   if (!db) throw new Error("Database not available");
   await db.delete(mediaFiles).where(eq(mediaFiles.id, id));
 }
+// Force rebuild
