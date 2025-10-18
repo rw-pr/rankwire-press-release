@@ -105,6 +105,11 @@ export default function PressReleaseView() {
             </Button>
             <div className="flex items-center gap-3">
               <h1 className="text-3xl font-bold">Press Release</h1>
+              {data.prId && (
+                <Badge variant="outline" className="font-mono text-base">
+                  {data.prId}
+                </Badge>
+              )}
               <Badge className={statusColors[data.status]}>
                 {data.status}
               </Badge>

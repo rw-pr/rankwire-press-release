@@ -79,6 +79,11 @@ export default function PressReleases() {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <FileText className="w-5 h-5 text-primary" />
+                        {pr.prId && (
+                          <Badge variant="outline" className="font-mono">
+                            {pr.prId}
+                          </Badge>
+                        )}
                         <Badge className={statusColors[pr.status]}>
                           {pr.status}
                         </Badge>

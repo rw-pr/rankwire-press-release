@@ -43,6 +43,7 @@ export type InsertEntity = typeof entities.$inferInsert;
 // Press releases table
 export const pressReleases = mysqlTable("pressReleases", {
   id: varchar("id", { length: 64 }).primaryKey(),
+  prId: varchar("prId", { length: 20 }).unique(),
   userId: varchar("userId", { length: 64 }).notNull().references(() => users.id, { onDelete: "cascade" }),
   entityId: varchar("entityId", { length: 64 }).references(() => entities.id, { onDelete: "set null" }),
   status: mysqlEnum("status", ["draft", "published", "reporting"]).default("draft").notNull(),

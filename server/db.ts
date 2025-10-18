@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users, entities, InsertEntity, pressReleases, InsertPressRelease, mediaFiles, InsertMediaFile } from "../drizzle/schema";
 import { ENV } from './_core/env';
@@ -132,9 +132,40 @@ export async function getPressReleaseById(id: string) {
   return result[0];
 }
 
+// Generate next PR ID in sequence (RW10000, RW10001, etc.)
+export async function generateNextPrId(): Promise<string> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  // Get the latest PR ID
+  const latest = await db
+    .select({ prId: pressReleases.prId })
+    .from(pressReleases)
+    .where(sql`${pressReleases.prId} IS NOT NULL`)
+    .orderBy(desc(pressReleases.prId))
+    .limit(1);
+  
+  if (latest.length === 0 || !latest[0].prId) {
+    // First PR ID
+    return "RW10000";
+  }
+  
+  // Extract number from latest PR ID (e.g., "RW10005" -> 10005)
+  const latestNumber = parseInt(latest[0].prId.replace("RW", ""), 10);
+  const nextNumber = latestNumber + 1;
+  
+  return `RW${nextNumber}`;
+}
+
 export async function createPressRelease(pressRelease: InsertPressRelease) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
+  
+  // Generate PR ID if not provided
+  if (!pressRelease.prId) {
+    pressRelease.prId = await generateNextPrId();
+  }
+  
   await db.insert(pressReleases).values(pressRelease);
   return pressRelease;
 }
